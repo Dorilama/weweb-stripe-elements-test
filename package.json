@@ -1,0 +1,14 @@
+{
+  "name": "weweb-stripe-elements-test",
+  "version": "0.0.1",
+  "scripts": {
+    "build": "weweb build",
+    "serve": "weweb serve"
+  },
+  "devDependencies": {
+    "@weweb/cli": "latest"
+  },
+  "dependencies": {
+    "@stripe/stripe-js": "^1.29.0"
+  }
+}
