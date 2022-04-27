@@ -1,4 +1,4 @@
-This is a test integration of Stripe Elements into weweb.io
+This is a test integration of Stripe Elements into weweb.io.
 
 # Section component starter
 
