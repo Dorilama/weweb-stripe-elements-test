@@ -20,7 +20,7 @@ export default {
     content: { type: Object, required: true },
   },
   data() {
-    return { stripe: null, error: null };
+    return { stripe: null, elements: null, error: null };
   },
   computed: {
     pubKey() {
@@ -45,13 +45,33 @@ export default {
         } catch (e) {
           this.sendMessage("error", e);
         }
+        this.createElement();
       },
       immediate: true,
+    },
+    "content.clientSecret": {
+      handler() {
+        this.createElement();
+      },
     },
   },
   methods: {
     sendMessage({ mode, obj }) {
       // TODO send message back to app
+    },
+    createElement() {
+      if (!this.stripe || !this.content.clientSecret) {
+        return;
+      }
+      const options = {
+        clientSecret: this.content.clientSecret,
+        // TODO add appearence options
+        appearance: {},
+      };
+
+      this.elements = this.stripe.elements(options);
+      const paymentElement = this.elements.create("payment");
+      paymentElement.mount(this.$refs.paymentElement);
     },
   },
 };
