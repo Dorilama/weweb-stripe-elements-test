@@ -16,24 +16,18 @@ export default {
       label: { en: "TEST publishable key" },
       type: "Text",
       section: "settings",
-      defaultValue:
-        "pk_test_51IoOr3GCtjJ66aX6cVqfuXaDeMT2fp3yCI63qVx8HcfxGxM4QrAQbSGHYm2Rb0BXJJ58hOWxtIM3g6AOK89Jnl2k00fris7cqS",
     },
     clientSecret: {
       label: { en: "Client secret from payment intent" },
       type: "Text",
       section: "settings",
       bindable: true,
-      defaultValue:
-        "pi_3KuJxbGCtjJ66aX61udk3R7n_secret_lQFnsY4VhFEYm4TCS5A5w8S0W",
     },
     returnUrl: {
       label: { en: "Return url" },
       type: "Text",
       section: "settings",
       bindable: true,
-      defaultValue:
-        "https://editor-dev.weweb.io/e618bd81-195e-46c7-8d97-7f393d6b8ebb",
     },
     submitButton: {
       hidden: true,
@@ -49,7 +43,7 @@ export default {
           // TODO choose how to handle icons
         },
         state: {
-          states: ["disabled", "loading"],
+          states: ["disabled"],
           style: {
             default: {
               backgroundColor: "#5469d4",
@@ -68,7 +62,6 @@ export default {
             ":hover_default": {
               customCss: { filter: "brightness(120%) saturate(120%)" },
             },
-            loading_default: {},
           },
         },
       },
@@ -94,6 +87,28 @@ export default {
               display: false,
             },
             error_default: { display: true },
+          },
+        },
+      },
+    },
+    globalLoad: {
+      hidden: true,
+      defaultValue: {
+        isWwObject: true,
+        type: "ww-icon",
+        content: {
+          icon: "fa fa-spinner fa-spin",
+          color: "#5469d4",
+          fontSize: 50,
+        },
+        state: {
+          states: ["loading"],
+          style: {
+            default: {
+              padding: "20px",
+              display: false,
+            },
+            loading_default: { display: true },
           },
         },
       },

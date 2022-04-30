@@ -1,9 +1,16 @@
 <template>
   <form @submit.prevent="handleSubmit">
+    <wwElement
+      :states="isGlobalLoad ? ['loading'] : []"
+      v-bind="content.globalLoad"
+    ></wwElement>
     <div ref="paymentElement" class="payment-element">
       <!-- Elements will create form elements here -->
     </div>
-    <wwElement v-bind="content.submitButton"><p>asdf</p></wwElement>
+    <wwElement
+      v-bind="content.submitButton"
+      :states="canPay ? [] : ['disabled']"
+    ></wwElement>
     <wwElement
       :states="errorMessage ? ['error'] : []"
       v-bind="content.errorText"
@@ -20,7 +27,7 @@ export default {
     content: { type: Object, required: true },
   },
   data() {
-    return { stripe: null, elements: null, error: null };
+    return { stripe: null, elements: null, error: null, loading: false };
   },
   computed: {
     pubKey() {
@@ -33,6 +40,13 @@ export default {
         return;
       }
       return this.error.message || "An unknown error occurred";
+    },
+    isGlobalLoad() {
+      return !this.elements;
+    },
+    canPay() {
+      console.log(!this.loading);
+      return !this.loading;
     },
   },
   watch: {
@@ -90,6 +104,7 @@ export default {
         // TODO warn ablout missing prop when in dev mode
         return;
       }
+      this.loading = true;
       this.error = null;
       const { error } = await this.stripe.confirmPayment({
         elements: this.elements,
@@ -97,7 +112,7 @@ export default {
           return_url: this.content.returnUrl,
         },
       });
-
+      this.loading = false;
       if (error) {
         this.error = error;
       } else {
