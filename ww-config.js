@@ -27,6 +27,14 @@ export default {
       defaultValue:
         "pi_3KuJxbGCtjJ66aX61udk3R7n_secret_lQFnsY4VhFEYm4TCS5A5w8S0W",
     },
+    returnUrl: {
+      label: { en: "Return url" },
+      type: "Text",
+      section: "settings",
+      bindable: true,
+      defaultValue:
+        "https://editor-dev.weweb.io/e618bd81-195e-46c7-8d97-7f393d6b8ebb",
+    },
     submitButton: {
       hidden: true,
       defaultValue: {

@@ -1,5 +1,5 @@
 <template>
-  <form>
+  <form @submit.prevent="handleSubmit">
     <div ref="paymentElement">
       <!-- Elements will create form elements here -->
     </div>
@@ -42,8 +42,8 @@ export default {
         }
         try {
           this.stripe = await loadStripe(this.pubKey);
-        } catch (e) {
-          this.sendMessage("error", e);
+        } catch (error) {
+          this.sendMessage("error", error);
         }
         this.createElement();
       },
@@ -54,9 +54,17 @@ export default {
         this.createElement();
       },
     },
+    error: {
+      handler() {
+        if (!this.error) {
+          return;
+        }
+        this.sendMessage("error", this.error);
+      },
+    },
   },
   methods: {
-    sendMessage({ mode, obj }) {
+    sendMessage(mode, obj) {
       // TODO send message back to app
     },
     createElement() {
@@ -72,6 +80,30 @@ export default {
       this.elements = this.stripe.elements(options);
       const paymentElement = this.elements.create("payment");
       paymentElement.mount(this.$refs.paymentElement);
+    },
+    async handleSubmit() {
+      if (!this.stripe || !this.elements) {
+        return;
+      }
+      if (!this.content.returnUrl) {
+        // TODO warn ablout missing prop when in dev mode
+        return;
+      }
+      this.error = null;
+      const { error } = await this.stripe.confirmPayment({
+        elements: this.elements,
+        confirmParams: {
+          return_url: this.content.returnUrl,
+        },
+      });
+
+      if (error) {
+        this.error = error;
+      } else {
+        // TODO log the error in dev mode only
+        console.log(error);
+        this.error = new Error("An unexpected error occured.");
+      }
     },
   },
 };
