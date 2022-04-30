@@ -1,9 +1,9 @@
 <template>
   <form @submit.prevent="handleSubmit">
-    <div ref="paymentElement">
+    <div ref="paymentElement" class="payment-element">
       <!-- Elements will create form elements here -->
     </div>
-    <wwElement v-bind="content.submitButton"></wwElement>
+    <wwElement v-bind="content.submitButton"><p>asdf</p></wwElement>
     <wwElement
       :states="errorMessage ? ['error'] : []"
       v-bind="content.errorText"
@@ -28,6 +28,7 @@ export default {
       return this.content.pubKeyTest;
     },
     errorMessage() {
+      // TODO handle translations
       if (!this.error) {
         return;
       }
@@ -109,4 +110,8 @@ export default {
 };
 </script>
 
-<style lang="css" scoped></style>
+<style lang="css" scoped>
+.payment-element {
+  margin-bottom: 24px;
+}
+</style>
