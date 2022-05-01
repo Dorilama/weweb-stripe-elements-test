@@ -4,9 +4,7 @@
       :states="elementReady ? [] : ['loading']"
       v-bind="content.globalLoad"
     ></wwElement>
-    <div ref="paymentElement" class="payment-element">
-      <!-- Elements will create form elements here -->
-    </div>
+    <div ref="paymentElement" class="payment-element"></div>
     <wwElement
       v-bind="content.submitButton"
       :states="canPay ? [] : ['disabled']"
@@ -51,11 +49,27 @@ export default {
     },
     updatableOptions() {
       // TODO add variables to appearence and rules
-      return {
+      const options = {
         locale: this.content.locale || "auto",
-        appearance: { theme: this.content.theme || "stripe" },
+        appearance: {
+          theme: this.content.theme || "stripe",
+        },
         clientSecret: this.content.clientSecret,
       };
+
+      if (this.content.variables) {
+        options.appearance.variables = Object.fromEntries(
+          this.content.variables.map((obj) => {
+            if (obj && obj.key) {
+              console.log(obj);
+              return [obj.key, obj.value];
+            }
+            return [];
+          })
+        );
+      }
+
+      return options;
     },
   },
   watch: {
@@ -117,7 +131,7 @@ export default {
         return;
       }
       if (!this.content.returnUrl) {
-        // TODO warn ablout missing prop when in dev mode
+        // TODO warn about missing prop when in dev mode
         return;
       }
       this.loading = true;

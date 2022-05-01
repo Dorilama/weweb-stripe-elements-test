@@ -43,6 +43,30 @@ export default {
       },
       defaultValue: "stripe",
     },
+    variables: {
+      label: { en: "Variables" },
+      type: "Array",
+      bindable: "true",
+      options: {
+        item: {
+          type: "Object",
+          options: {
+            item: {
+              key: {
+                label: { en: "Name" },
+                type: "Text",
+                options: { placeholder: "Variable name" },
+              },
+              value: {
+                label: { en: "Value" },
+                type: "Text",
+                options: { placeholder: "Value" },
+              },
+            },
+          },
+        },
+      },
+    },
     locale: {
       label: { en: "Locale" },
       type: "TextSelect",
