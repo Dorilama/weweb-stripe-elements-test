@@ -105,6 +105,10 @@ export default {
           options.apiVersion = this.content.apiVersion;
         }
 
+        if (!this.content.fraud) {
+          loadStripe.setLoadParameters({ advancedFraudSignals: false });
+        }
+
         try {
           this.stripe = await loadStripe(this.pubKey);
         } catch (error) {

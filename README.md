@@ -3,6 +3,7 @@ This is a test integration of Stripe Elements into weweb.io.
 # Implemented features
 - [x] Use Payment Element to collect payment details and confirm the payment
 - [] Connected account
+- [] Automatic use test/live keys
 - [x] Locale configuration
 - [x] Appearance - Theme
 - [x] Appearance - Variables
@@ -10,7 +11,7 @@ This is a test integration of Stripe Elements into weweb.io.
 - [x] Appearance - Labels floating/above
 - [] Custom fonts
 - [x] Api version override
-- [] Optionally disable advanced fraud detection
+- [x] Optionally disable advanced fraud detection
 
 
 # Section component starter

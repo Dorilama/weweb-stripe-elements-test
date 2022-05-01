@@ -408,6 +408,12 @@ export default {
       type: "Text",
       section: "settings",
     },
+    fraud: {
+      label: { en: "Enable Advanced Fraud Signals" },
+      type: "OnOff",
+      section: "settings",
+      defaultValue: true,
+    },
     // TODO prevent selectiong different buttonType and adding link behaviour
     submitButton: {
       hidden: true,
