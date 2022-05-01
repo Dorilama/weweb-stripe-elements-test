@@ -48,7 +48,6 @@ export default {
       return !this.loading;
     },
     updatableOptions() {
-      // TODO add variables to appearence and rules
       const options = {
         locale: this.content.locale || "auto",
         appearance: {

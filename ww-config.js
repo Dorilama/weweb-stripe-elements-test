@@ -3,6 +3,10 @@ export default {
     label: {
       en: "Stripe Elements Test",
     },
+    icon: "fontawesome/solid/dollar-sign",
+    bubble: {
+      icon: "fontawesome/solid/dollar-sign",
+    },
   },
   triggerEvents: [],
   properties: {
