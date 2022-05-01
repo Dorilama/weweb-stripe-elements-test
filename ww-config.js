@@ -418,7 +418,6 @@ export default {
       section: "settings",
       defaultValue: true,
     },
-    // TODO prevent selectiong different buttonType and adding link behaviour
     submitButton: {
       hidden: true,
       defaultValue: {

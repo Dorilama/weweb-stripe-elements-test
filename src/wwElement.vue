@@ -91,6 +91,24 @@ export default {
       // TODO log rules and variables in edit mode
       return options;
     },
+    /* wwEditor:start */
+    buttonType() {
+      const uid = this.content.submitButton && this.content.submitButton.uid;
+      if (!uid) {
+        return;
+      }
+      const obj = wwLib.wwElementHelper.getWwObject(uid);
+      return obj.content.default.buttonType;
+    },
+    link() {
+      const uid = this.content.submitButton && this.content.submitButton.uid;
+      if (!uid) {
+        return;
+      }
+      const obj = wwLib.wwElementHelper.getWwObject(uid);
+      return obj._state.link && obj._state.link.type;
+    },
+    /* wwEditor:end */
   },
   watch: {
     pubKey: {
@@ -131,6 +149,40 @@ export default {
       },
       deep: true,
     },
+    /* wwEditor:start */
+    buttonType(value) {
+      if (value === "submit" || value === undefined) {
+        return;
+      }
+      const obj = wwLib.wwElementHelper.getWwObject(
+        this.content.submitButton.uid
+      );
+      obj.content.default.buttonType = "submit";
+      wwLib.wwNotification.open({
+        text: {
+          en: 'The pay button must be of type "Submit Button"',
+        },
+        color: "purple",
+        duration: 3000,
+      });
+    },
+    link(value) {
+      if (value === "none" || value === undefined) {
+        return;
+      }
+      const obj = wwLib.wwElementHelper.getWwObject(
+        this.content.submitButton.uid
+      );
+      obj._state.link = { type: "none" };
+      wwLib.wwNotification.open({
+        text: {
+          en: `The pay button can't link`,
+        },
+        color: "purple",
+        duration: 3000,
+      });
+    },
+    /* wwEditor:end */
   },
   methods: {
     sendMessage(mode, obj) {
