@@ -59,16 +59,36 @@ export default {
 
       if (this.content.variables) {
         options.appearance.variables = Object.fromEntries(
-          this.content.variables.map((obj) => {
-            if (obj && obj.key) {
-              console.log(obj);
-              return [obj.key, obj.value];
+          this.content.variables.map(({ key, value } = {}) => {
+            if (key) {
+              return [key, value];
             }
             return [];
           })
         );
       }
 
+      if (this.content.rules) {
+        options.appearance.rules = Object.fromEntries(
+          this.content.rules.map(({ selector, props } = {}) => {
+            if (selector && props) {
+              const allProps = Object.fromEntries(
+                props.map(({ key, value } = {}) => {
+                  if (key) {
+                    return [key, value];
+                  }
+                  return [];
+                })
+              );
+
+              return [selector, allProps];
+            }
+            return [];
+          })
+        );
+      }
+
+      // TODO log rules and variables in edit mode
       return options;
     },
   },

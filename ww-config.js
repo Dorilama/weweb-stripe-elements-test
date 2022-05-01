@@ -67,6 +67,48 @@ export default {
         },
       },
     },
+    rules: {
+      label: { en: "Rules" },
+      type: "Array",
+      bindable: "true",
+      options: {
+        item: {
+          type: "Object",
+          options: {
+            item: {
+              selector: {
+                label: { en: "Selector" },
+                type: "Text",
+                options: { placeholder: "Selector rule" },
+              },
+              props: {
+                label: { en: "Properties" },
+                type: "Array",
+                options: {
+                  item: {
+                    type: "Object",
+                    options: {
+                      item: {
+                        key: {
+                          label: { en: "Name" },
+                          type: "Text",
+                          options: { placeholder: "Property name" },
+                        },
+                        value: {
+                          label: { en: "Value" },
+                          type: "Text",
+                          options: { placeholder: "Property value" },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
     locale: {
       label: { en: "Locale" },
       type: "TextSelect",
