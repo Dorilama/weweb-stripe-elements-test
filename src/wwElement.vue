@@ -1,7 +1,7 @@
 <template>
   <form @submit.prevent="handleSubmit">
     <wwElement
-      :states="isGlobalLoad ? ['loading'] : []"
+      :states="elementReady ? [] : ['loading']"
       v-bind="content.globalLoad"
     ></wwElement>
     <div ref="paymentElement" class="payment-element">
@@ -27,10 +27,15 @@ export default {
     content: { type: Object, required: true },
   },
   data() {
-    return { stripe: null, elements: null, error: null, loading: false };
+    return {
+      stripe: null,
+      elements: null,
+      error: null,
+      loading: false,
+      elementReady: false,
+    };
   },
   computed: {
-    // TODO detect edit mode and set a mock pubKey + clientSecret to display the form
     pubKey() {
       // TODO figure out how to detect live app
       return this.content.pubKeyTest;
@@ -41,10 +46,6 @@ export default {
       }
       return this.error.message || "An unknown error occurred";
     },
-    isGlobalLoad() {
-      // TODO listen to ready event to disable global loading
-      return !this.elements;
-    },
     canPay() {
       return !this.loading;
     },
@@ -53,6 +54,7 @@ export default {
       return {
         locale: this.content.locale || "auto",
         appearance: { theme: this.content.theme || "stripe" },
+        clientSecret: this.content.clientSecret,
       };
     },
   },
@@ -79,11 +81,6 @@ export default {
         this.sendMessage("error", this.error);
       },
     },
-    "content.clientSecret": {
-      handler() {
-        this.createElement();
-      },
-    },
     updatableOptions: {
       handler() {
         this.updateElements();
@@ -100,14 +97,20 @@ export default {
         return;
       }
       const options = {
-        clientSecret: this.content.clientSecret,
         loader: this.content.loader || "auto",
         ...this.updatableOptions,
       };
 
       this.elements = this.stripe.elements(options);
       const paymentElement = this.elements.create("payment");
+      const setReady = this.setElementReady;
+      paymentElement.on("ready", () => {
+        setReady(true);
+      });
       paymentElement.mount(this.$refs.paymentElement);
+    },
+    setElementReady(value) {
+      this.elementReady = value;
     },
     async handleSubmit() {
       if (!this.stripe || !this.elements) {
@@ -135,10 +138,11 @@ export default {
       }
     },
     updateElements() {
-      if (!this.elements) {
-        return;
+      if (this.elements) {
+        this.elements.update(this.updatableOptions);
+      } else {
+        this.createElement();
       }
-      this.elements.update(this.updatableOptions);
     },
   },
 };

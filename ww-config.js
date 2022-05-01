@@ -383,6 +383,7 @@ export default {
             default: {
               padding: "12px 0 0 0",
               display: false,
+              transition: "all 0.2s ease",
             },
             error_default: { display: true },
           },
@@ -405,6 +406,7 @@ export default {
             default: {
               padding: "20px",
               display: false,
+              transition: "all 0.2s ease",
             },
             loading_default: { display: true },
           },
