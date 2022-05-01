@@ -394,7 +394,6 @@ export default {
     loader: {
       label: { en: "Elements loader" },
       type: "TextSelect",
-      section: "settings",
       options: {
         options: [
           { value: "auto", label: { en: "auto" } },
@@ -403,6 +402,11 @@ export default {
         ],
       },
       defaultValue: "auto",
+    },
+    apiVersion: {
+      label: { en: "Override Api Version" },
+      type: "Text",
+      section: "settings",
     },
     // TODO prevent selectiong different buttonType and adding link behaviour
     submitButton: {

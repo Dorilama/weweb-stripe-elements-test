@@ -9,7 +9,7 @@ This is a test integration of Stripe Elements into weweb.io.
 - [x] Appearance - Rules
 - [x] Appearance - Labels floating/above
 - [] Custom fonts
-- [] Api version override
+- [x] Api version override
 - [] Optionally disable advanced fraud detection
 
 

@@ -99,6 +99,12 @@ export default {
         if (!this.pubKey) {
           return;
         }
+        const options = {};
+        if (this.content.apiVersion) {
+          // TODO warn abour necessary reload in editor
+          options.apiVersion = this.content.apiVersion;
+        }
+
         try {
           this.stripe = await loadStripe(this.pubKey);
         } catch (error) {
