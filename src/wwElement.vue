@@ -23,6 +23,9 @@ import { loadStripe } from "@stripe/stripe-js";
 export default {
   props: {
     content: { type: Object, required: true },
+    /* wwEditor:start */
+    wwEditorState: { type: Object, required: true },
+    /* wwEditor:end */
   },
   data() {
     return {
@@ -34,9 +37,13 @@ export default {
     };
   },
   computed: {
+    isLive() {
+      // TODO is this good enough?
+      const editors = ["editor-dev.weweb.io", "editor.weweb.io"];
+      return !editors.includes(location.host);
+    },
     pubKey() {
-      // TODO figure out how to detect live app
-      return this.content.pubKeyTest;
+      return this.isLive ? this.content.pubKeyLive : this.content.pubKeyTest;
     },
     errorMessage() {
       if (!this.error) {
@@ -66,6 +73,9 @@ export default {
             return [];
           })
         );
+        if (!this.isLive) {
+          console.log("variables", options.appearance.variables);
+        }
       }
 
       if (this.content.rules) {
@@ -86,9 +96,11 @@ export default {
             return [];
           })
         );
+        if (!this.isLive) {
+          console.log("rules", options.appearance.rules);
+        }
       }
 
-      // TODO log rules and variables in edit mode
       return options;
     },
     /* wwEditor:start */
@@ -150,6 +162,45 @@ export default {
       deep: true,
     },
     /* wwEditor:start */
+    "wwEditorState.editMode"() {
+      if (
+        this.wwEditorState.editMode === wwLib.wwEditorHelper.EDIT_MODES.PREVIEW
+      ) {
+        if (!this.content.returnUrl) {
+          wwLib.wwNotification.open({
+            text: {
+              en: `Stripe Element Test - Missing parameter "Return Url"`,
+            },
+            color: "purple",
+            duration: 3000,
+          });
+        }
+        if (
+          !this.content.pubKeyLive ||
+          !this.content.pubKeyLive.startsWith("pk_live")
+        ) {
+          wwLib.wwNotification.open({
+            text: {
+              en: `Stripe Element Test - LIVE public key not correct. It should start with "pk_live"`,
+            },
+            color: "purple",
+            duration: 3000,
+          });
+        }
+        if (
+          !this.content.pubKeyTest ||
+          !this.content.pubKeyTest.startsWith("pk_test")
+        ) {
+          wwLib.wwNotification.open({
+            text: {
+              en: `Stripe Element Test - TEST public key not correct It should start with "pk_test"`,
+            },
+            color: "purple",
+            duration: 3000,
+          });
+        }
+      }
+    },
     buttonType(value) {
       if (value === "submit" || value === undefined) {
         return;
@@ -213,7 +264,7 @@ export default {
         return;
       }
       if (!this.content.returnUrl) {
-        // TODO warn about missing prop when in dev mode
+        console.error(`Stripe Element Test - Missing parameter "Return Url"`);
         return;
       }
       this.loading = true;
@@ -228,7 +279,6 @@ export default {
       if (error) {
         this.error = error;
       } else {
-        // TODO log the error in dev mode only
         console.log(error);
         this.error = new Error("An unexpected error occured.");
       }

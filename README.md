@@ -3,7 +3,7 @@ This is a test integration of Stripe Elements into weweb.io.
 # Implemented features
 - [x] Use Payment Element to collect payment details and confirm the payment
 - [] Connected account
-- [] Automatic use test/live keys
+- [x] Automatic use test/live keys
 - [x] Locale configuration
 - [x] Appearance - Theme
 - [x] Appearance - Variables
