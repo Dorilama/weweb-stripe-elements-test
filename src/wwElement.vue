@@ -30,23 +30,30 @@ export default {
     return { stripe: null, elements: null, error: null, loading: false };
   },
   computed: {
+    // TODO detect edit mode and set a mock pubKey + clientSecret to display the form
     pubKey() {
       // TODO figure out how to detect live app
       return this.content.pubKeyTest;
     },
     errorMessage() {
-      // TODO handle translations
       if (!this.error) {
         return;
       }
       return this.error.message || "An unknown error occurred";
     },
     isGlobalLoad() {
+      // TODO listen to ready event to disable global loading
       return !this.elements;
     },
     canPay() {
-      console.log(!this.loading);
       return !this.loading;
+    },
+    updatableOptions() {
+      // TODO add variables to appearence and rules
+      return {
+        locale: this.content.locale || "auto",
+        appearance: { theme: this.content.theme || "stripe" },
+      };
     },
   },
   watch: {
@@ -64,11 +71,6 @@ export default {
       },
       immediate: true,
     },
-    "content.clientSecret": {
-      handler() {
-        this.createElement();
-      },
-    },
     error: {
       handler() {
         if (!this.error) {
@@ -76,6 +78,17 @@ export default {
         }
         this.sendMessage("error", this.error);
       },
+    },
+    "content.clientSecret": {
+      handler() {
+        this.createElement();
+      },
+    },
+    updatableOptions: {
+      handler() {
+        this.updateElements();
+      },
+      deep: true,
     },
   },
   methods: {
@@ -88,8 +101,8 @@ export default {
       }
       const options = {
         clientSecret: this.content.clientSecret,
-        // TODO add appearence options
-        appearance: {},
+        loader: this.content.loader || "auto",
+        ...this.updatableOptions,
       };
 
       this.elements = this.stripe.elements(options);
@@ -120,6 +133,12 @@ export default {
         console.log(error);
         this.error = new Error("An unexpected error occured.");
       }
+    },
+    updateElements() {
+      if (!this.elements) {
+        return;
+      }
+      this.elements.update(this.updatableOptions);
     },
   },
 };
