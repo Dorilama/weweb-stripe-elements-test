@@ -53,6 +53,7 @@ export default {
         locale: this.content.locale || "auto",
         appearance: {
           theme: this.content.theme || "stripe",
+          labels: this.content.labels,
         },
         clientSecret: this.content.clientSecret,
       };

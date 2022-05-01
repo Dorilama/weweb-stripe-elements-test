@@ -109,6 +109,18 @@ export default {
         },
       },
     },
+    labels: {
+      label: { en: "Labels" },
+      type: "TextSelect",
+      bindable: "true",
+      options: {
+        options: [
+          { value: "above", label: { en: "above" } },
+          { value: "floating", label: { en: "floating" } },
+        ],
+      },
+      defaultValue: "above",
+    },
     locale: {
       label: { en: "Locale" },
       type: "TextSelect",

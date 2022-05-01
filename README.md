@@ -7,6 +7,7 @@ This is a test integration of Stripe Elements into weweb.io.
 - [x] Appearance - Theme
 - [x] Appearance - Variables
 - [x] Appearance - Rules
+- [x] Appearance - Labels floating/above
 - [] Custom fonts
 - [] Api version override
 - [] Optionally disable advanced fraud detection
