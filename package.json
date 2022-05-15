@@ -1,6 +1,6 @@
 {
   "name": "weweb-stripe-elements-test",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "scripts": {
     "build": "weweb build",
     "serve": "weweb serve"
