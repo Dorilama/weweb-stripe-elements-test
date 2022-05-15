@@ -1,5 +1,8 @@
 <template>
   <form @submit.prevent="handleSubmit">
+    <div v-if="showOverlay" class="overlay">
+      <p>{{ editorErrorMessage }}</p>
+    </div>
     <wwElement
       :states="elementReady ? [] : ['loading']"
       v-bind="content.globalLoad"
@@ -8,8 +11,10 @@
     <wwElement
       v-bind="content.submitButton"
       :states="canPay ? [] : ['disabled']"
+      :disabled="!canPay"
     ></wwElement>
     <wwElement
+      v-if="!!errorMessage"
       :states="errorMessage ? ['error'] : []"
       v-bind="content.errorText"
       :ww-props="{ text: errorMessage }"
@@ -28,20 +33,25 @@ export default {
     /* wwEditor:end */
   },
   data() {
+    let isLive = true;
+    /* wwEditor:start */
+    isLive = false;
+    /* wwEditor:end */
+
     return {
+      isLive,
       stripe: null,
       elements: null,
       error: null,
       loading: false,
       elementReady: false,
+      /* wwEditor:start */
+      styleError: "",
+      /* wwEditor:end */
     };
   },
+  emits: ["trigger-event", "update:content"],
   computed: {
-    isLive() {
-      // TODO is this good enough?
-      const editors = ["editor-dev.weweb.io", "editor.weweb.io"];
-      return !editors.includes(location.host);
-    },
     pubKey() {
       return this.isLive ? this.content.pubKeyLive : this.content.pubKeyTest;
     },
@@ -52,9 +62,18 @@ export default {
       return this.error.message || "An unknown error occurred";
     },
     canPay() {
-      return !this.loading;
+      return (
+        this.stripe &&
+        this.elements &&
+        this.content.returnUrl &&
+        !this.loading &&
+        !this.isEditor
+      );
     },
     updatableOptions() {
+      /* wwEditor:start */
+      this.styleError = "";
+      /* wwEditor:end */
       const options = {
         locale: this.content.locale || "auto",
         appearance: {
@@ -64,61 +83,126 @@ export default {
         clientSecret: this.content.clientSecret,
       };
 
-      if (this.content.variables) {
-        options.appearance.variables = Object.fromEntries(
-          this.content.variables.map(({ key, value } = {}) => {
-            if (key) {
-              return [key, value];
-            }
-            return [];
-          })
-        );
-        if (!this.isLive) {
-          console.log("variables", options.appearance.variables);
+      try {
+        if (this.content.variables) {
+          options.appearance.variables = Object.fromEntries(
+            this.content.variables.map(({ key, value } = {}) => {
+              if (key) {
+                return [key, value];
+              }
+              return [];
+            })
+          );
+          if (!this.isLive) {
+            console.log("variables", options.appearance.variables);
+          }
         }
-      }
 
-      if (this.content.rules) {
-        options.appearance.rules = Object.fromEntries(
-          this.content.rules.map(({ selector, props } = {}) => {
-            if (selector && props) {
-              const allProps = Object.fromEntries(
-                props.map(({ key, value } = {}) => {
-                  if (key) {
-                    return [key, value];
-                  }
-                  return [];
-                })
-              );
+        if (this.content.rules) {
+          options.appearance.rules = Object.fromEntries(
+            this.content.rules.map(({ selector, props } = {}) => {
+              if (selector && props) {
+                const allProps = Object.fromEntries(
+                  props.map(({ key, value } = {}) => {
+                    if (key) {
+                      return [key, value];
+                    }
+                    return [];
+                  })
+                );
 
-              return [selector, allProps];
-            }
-            return [];
-          })
-        );
-        if (!this.isLive) {
-          console.log("rules", options.appearance.rules);
+                return [selector, allProps];
+              }
+              return [];
+            })
+          );
+          if (!this.isLive) {
+            console.log("rules", options.appearance.rules);
+          }
         }
+      } catch (e) {
+        console.error(e);
+        /* wwEditor:start */
+        this.styleError = "Appearance error:\n" + e.message;
+        /* wwEditor:end */
       }
 
       return options;
     },
-    /* wwEditor:start */
-    buttonType() {
-      const uid = this.content.submitButton && this.content.submitButton.uid;
-      if (!uid) {
-        return;
-      }
-      const obj = wwLib.wwElementHelper.getWwObject(uid);
-      return obj.content.default.buttonType;
+    isEditor() {
+      let value = false;
+      /* wwEditor:start */
+      this.wwEditorState.editMode === wwLib.wwEditorHelper.EDIT_MODES.EDITION;
+      /* wwEditor:end */
+
+      return value;
     },
-    link() {
+    /* wwEditor:start */
+    isPreview() {
+      return (
+        this.wwEditorState.editMode === wwLib.wwEditorHelper.EDIT_MODES.PREVIEW
+      );
+    },
+    buttonTypeOK() {
       const uid = this.content.submitButton && this.content.submitButton.uid;
       if (!uid) {
         return;
       }
       const obj = wwLib.wwElementHelper.getWwObject(uid);
-      return obj._state.link && obj._state.link.type;
+      return obj.content.default.buttonType == "submit";
+    },
+    linkOK() {
+      const uid = this.content.submitButton && this.content.submitButton.uid;
+      if (!uid) {
+        return;
+      }
+      const obj = wwLib.wwElementHelper.getWwObject(uid);
+      const allowed = [undefined, "none"];
+      return !obj._state.link || allowed.includes(obj._state.link.type);
+    },
+    liveKeyOK() {
+      return (
+        this.content.pubKeyLive && this.content.pubKeyLive.startsWith("pk_live")
+      );
+    },
+    testKeyOK() {
+      return (
+        this.content.pubKeyTest && this.content.pubKeyTest.startsWith("pk_test")
+      );
+    },
+    returnUrlOK() {
+      return !!this.content.returnUrl;
+    },
+    editorErrors() {
+      const errors = [];
+      if (!this.buttonTypeOK) {
+        errors.push(
+          'The pay button shoul be of type "Submit Button". Select it from the element list to correct this error.'
+        );
+      }
+      if (!this.linkOK) {
+        errors.push(
+          "The pay button should not link to any page. Select it from the element list to correct this error."
+        );
+      }
+      if (!this.liveKeyOK) {
+        errors.push('The live key should start with "pk_live"');
+      }
+      if (!this.testKeyOK) {
+        errors.push('The test key should start with "pk_test"');
+      }
+      if (!this.returnUrlOK) {
+        errors.push("The return url should not be empty");
+      }
+      return errors;
+    },
+    editorErrorMessage() {
+      return `Error:
+      ${this.editorErrors.join("\n")}
+      ${this.styleError}`;
+    },
+    showOverlay() {
+      return !!this.editorErrors.length || this.styleError;
     },
     /* wwEditor:end */
   },
@@ -161,83 +245,13 @@ export default {
       },
       deep: true,
     },
-    /* wwEditor:start */
-    "wwEditorState.editMode"() {
-      if (
-        this.wwEditorState.editMode === wwLib.wwEditorHelper.EDIT_MODES.PREVIEW
-      ) {
-        if (!this.content.returnUrl) {
-          wwLib.wwNotification.open({
-            text: {
-              en: `Stripe Element Test - Missing parameter "Return Url"`,
-            },
-            color: "purple",
-            duration: 3000,
-          });
-        }
-        if (
-          !this.content.pubKeyLive ||
-          !this.content.pubKeyLive.startsWith("pk_live")
-        ) {
-          wwLib.wwNotification.open({
-            text: {
-              en: `Stripe Element Test - LIVE public key not correct. It should start with "pk_live"`,
-            },
-            color: "purple",
-            duration: 3000,
-          });
-        }
-        if (
-          !this.content.pubKeyTest ||
-          !this.content.pubKeyTest.startsWith("pk_test")
-        ) {
-          wwLib.wwNotification.open({
-            text: {
-              en: `Stripe Element Test - TEST public key not correct It should start with "pk_test"`,
-            },
-            color: "purple",
-            duration: 3000,
-          });
-        }
-      }
-    },
-    buttonType(value) {
-      if (value === "submit" || value === undefined) {
-        return;
-      }
-      const obj = wwLib.wwElementHelper.getWwObject(
-        this.content.submitButton.uid
-      );
-      obj.content.default.buttonType = "submit";
-      wwLib.wwNotification.open({
-        text: {
-          en: 'The pay button must be of type "Submit Button"',
-        },
-        color: "purple",
-        duration: 3000,
-      });
-    },
-    link(value) {
-      if (value === "none" || value === undefined) {
-        return;
-      }
-      const obj = wwLib.wwElementHelper.getWwObject(
-        this.content.submitButton.uid
-      );
-      obj._state.link = { type: "none" };
-      wwLib.wwNotification.open({
-        text: {
-          en: `The pay button can't link`,
-        },
-        color: "purple",
-        duration: 3000,
-      });
-    },
-    /* wwEditor:end */
   },
   methods: {
     sendMessage(mode, obj) {
-      // TODO send message back to app
+      this.$emit("trigger-event", {
+        name: "error",
+        event: { value: this.errorMessage },
+      });
     },
     createElement() {
       if (!this.stripe || !this.content.clientSecret) {
@@ -250,25 +264,23 @@ export default {
 
       this.elements = this.stripe.elements(options);
       const paymentElement = this.elements.create("payment");
-      const setReady = this.setElementReady;
+      this.elementReady = true;
       paymentElement.on("ready", () => {
-        setReady(true);
+        this.$emit("trigger-event", {
+          name: "ready",
+        });
       });
       paymentElement.mount(this.$refs.paymentElement);
     },
-    setElementReady(value) {
-      this.elementReady = value;
-    },
     async handleSubmit() {
-      if (!this.stripe || !this.elements) {
-        return;
-      }
-      if (!this.content.returnUrl) {
-        console.error(`Stripe Element Test - Missing parameter "Return Url"`);
+      if (!this.canPay) {
         return;
       }
       this.loading = true;
       this.error = null;
+      this.$emit("trigger-event", {
+        name: "loading:start",
+      });
       const { error } = await this.stripe.confirmPayment({
         elements: this.elements,
         confirmParams: {
@@ -282,6 +294,9 @@ export default {
         console.log(error);
         this.error = new Error("An unexpected error occured.");
       }
+      this.$emit("trigger-event", {
+        name: "loading:end",
+      });
     },
     updateElements() {
       if (this.elements) {
@@ -295,6 +310,26 @@ export default {
 </script>
 
 <style lang="css" scoped>
+/* wwEditor:start */
+.overlay {
+  width: 100%;
+  height: 100%;
+  color: black;
+  font-size: 18px;
+  font-weight: bold;
+  background-color: rgb(241, 187, 187);
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0.8;
+  z-index: 1;
+  padding: 20px;
+  white-space: pre-line;
+}
+.parent {
+  position: relative;
+}
+/* wwEditor:end */
 .payment-element {
   margin-bottom: 24px;
 }
