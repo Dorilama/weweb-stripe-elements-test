@@ -38,8 +38,6 @@ export default {
       label: { en: "TEST publishable key" },
       type: "Text",
       section: "settings",
-      defaultValue:
-        "pk_test_51KyYrMEdkxk1Tm6mkMZ1PBRukCccJhVJ5yr9YoXFmLcbPg3h2fR2eOCmMG31a7oe6wDPrgitBK0qRVuMsn6rizSS00LJp9Yxkh",
     },
     clientSecret: {
       label: { en: "Client secret from payment intent" },
@@ -52,8 +50,6 @@ export default {
       type: "Text",
       section: "settings",
       bindable: true,
-      defaultValue:
-        "https://editor-dev.weweb.io/e618bd81-195e-46c7-8d97-7f393d6b8ebb",
     },
     theme: {
       label: { en: "Theme" },
