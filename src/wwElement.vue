@@ -14,7 +14,7 @@
       :disabled="!canPay"
     ></wwElement>
     <wwElement
-      v-if="!!errorMessage"
+      v-if="errorMessage"
       :states="errorMessage ? ['error'] : []"
       v-bind="content.errorText"
       :ww-props="{ text: errorMessage }"
@@ -40,8 +40,6 @@ export default {
 
     return {
       isLive,
-      stripe: null,
-      elements: null,
       error: null,
       loading: false,
       elementReady: false,
@@ -56,19 +54,19 @@ export default {
       return this.isLive ? this.content.pubKeyLive : this.content.pubKeyTest;
     },
     errorMessage() {
-      if (!this.error) {
-        return;
+      let message;
+      if (this.error) {
+        message = this.error.message || "An unknown error occurred";
       }
-      return this.error.message || "An unknown error occurred";
+      /* wwEditor:start */
+      if (this.wwEditorState.sidepanelContent.showError) {
+        message = "This is the error text";
+      }
+      /* wwEditor:end */
+      return message;
     },
     canPay() {
-      return (
-        this.stripe &&
-        this.elements &&
-        this.content.returnUrl &&
-        !this.loading &&
-        !this.isEditor
-      );
+      return this.content.returnUrl && !this.loading && !this.isEditor;
     },
     updatableOptions() {
       /* wwEditor:start */
@@ -208,8 +206,8 @@ export default {
   },
   watch: {
     pubKey: {
-      async handler() {
-        if (!this.pubKey) {
+      async handler(value, oldVal) {
+        if (!value || value == oldVal) {
           return;
         }
         const options = {};
@@ -273,7 +271,7 @@ export default {
       paymentElement.mount(this.$refs.paymentElement);
     },
     async handleSubmit() {
-      if (!this.canPay) {
+      if (!this.stripe || !this.elements || !this.canPay) {
         return;
       }
       this.loading = true;
@@ -314,6 +312,8 @@ export default {
 .overlay {
   width: 100%;
   height: 100%;
+  max-height: 100px;
+  overflow: auto;
   color: black;
   font-size: 18px;
   font-weight: bold;
@@ -330,7 +330,4 @@ export default {
   position: relative;
 }
 /* wwEditor:end */
-.payment-element {
-  margin-bottom: 24px;
-}
 </style>

@@ -205,6 +205,7 @@ export default {
               borderRadius: "4px",
               border: 0,
               padding: "12px 16px",
+              margin: "24px 0px 0px 0px",
               cursor: "pointer",
               transition: "all 0.2s ease",
               boxShadow: "0px 4px 5.5px 0px rgba(0, 0, 0, 0.07)",
@@ -275,6 +276,13 @@ export default {
           },
         },
       },
+    },
+    showError: {
+      label: {
+        en: "Show error text",
+      },
+      type: "OnOff",
+      editorOnly: true,
     },
   },
 };
