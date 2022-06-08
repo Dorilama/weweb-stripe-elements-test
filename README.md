@@ -1,5 +1,7 @@
 This is a test integration of Stripe Elements into weweb.io.
 
+![preview](./preview.gif)
+
 # Implemented features
 - [x] Use Payment Element to collect payment details and confirm the payment
 - [ ] Connected account
